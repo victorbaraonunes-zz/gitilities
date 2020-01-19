@@ -1,0 +1,20 @@
+{
+  "name": "gitutils",
+  "version": "1.0.0",
+  "description": "some git utilities",
+  "main": "index.js",
+  "bin": {
+    "gitutils": "index.js"
+  },
+  "dependencies": {
+    "commander": "^4.1.0"
+  },
+  "devDependencies": {
+    "pkg": "^4.4.2"
+  },
+  "scripts": {
+    "dist": "mkdir -p dist && pkg . --out-path dist"
+  },
+  "author": "Victor Barão Nunes <victorbaraonunes@gmail.com>",
+  "license": "MIT"
+}
