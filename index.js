@@ -2,7 +2,7 @@
 
 const program = require('commander');
 const package = require('./package.json');
-const exec = require('child_process').exec;
+const shell = require('shelljs');
 
 program.version(package);
 program.description('some git utilities');
@@ -10,31 +10,43 @@ program.option('-c, --commit <commit>', 'commit hash to run. min length = 7');
 
 program.parse(process.argv);
 
-if (program.commit) {
-    if (program.commit.length < 7) {
-        console.error('commit hash too short :/');
+if (!shell.which('git')) {
+    console.error('git is required :/');
+    shell.exit(1);
+}
+
+if (!program.commit) {
+    program.help();
+    shell.exit(1);
+}
+
+if (program.commit.length < 7) {
+    console.error('commit hash too short :/');
+    shell.exit(1);
+}
+
+let commitFiles = [];
+
+try {
+    commitFiles = shell.exec(`git show --pretty="" --name-only ${program.commit}`, { encoding: 'utf8' }).split('\n');
+} catch (e) {
+    console.error('error fetching commit files :/', e);
+    shell.exit(1);
+}
+
+if (!commitFiles || !commitFiles.length) shell.exit(1);
+
+commitFiles.forEach((file) => {
+    if (!file) return;
+
+    try {
+        const fileLastCharacter = shell.tail({ '-n': 1 }, file);
+        
+        // let command = `echo >> ${file}`;
+        // if (fileLastCharacter.includes('\n')) command = '';
+        // shell.exec(command, { encoding: 'utf8' });
+    } catch (e) {
+        console.error(`error editing file ${file}`);
         process.exit(1);
     }
-
-    exec(`git show --pretty="" --name-only ${program.commit}`, (error, stdout, stderr) => {
-        console.log('error', error);
-
-        if (error) {
-            console.error('execution failed :/', error);
-            process.exit(1);
-        }
-
-        console.log('stdout', stdout.split('\n'));
-        console.log('stderr', stderr);
-
-        stdout.split('\n').forEach((file) => {
-            if (!file) return;
-
-            exec(`echo >> `, () => {
-
-            });
-        });
-    });
-} else {
-    program.help();   
-}
+});
