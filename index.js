@@ -41,12 +41,12 @@ commitFiles.forEach((file) => {
 
     try {
         const fileLastCharacter = shell.tail({ '-n': 1 }, file);
-        
-        // let command = `echo >> ${file}`;
-        // if (fileLastCharacter.includes('\n')) command = '';
-        // shell.exec(command, { encoding: 'utf8' });
+        let command = `echo >> ${file}`;
+
+        if (fileLastCharacter.includes('\n')) command = `truncate -s-1 ${file}`;
+
+        shell.exec(command, { encoding: 'utf8' });
     } catch (e) {
         console.error(`error editing file ${file}`);
-        process.exit(1);
     }
 });
